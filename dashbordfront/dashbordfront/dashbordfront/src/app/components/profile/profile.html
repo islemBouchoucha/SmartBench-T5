@@ -1,0 +1,127 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="profile-container">
+
+    <header class="profile-header">
+      <h1>{{ 'profile.title.pre' | translate }} <span class="highlight">{{ 'profile.title.highlight' | translate }}</span></h1>
+      <p>{{ 'profile.subtitle' | translate }}</p>
+    </header>
+
+    @if (successMessage) {
+      <div class="alert-success"><i class="fa fa-circle-check"></i> {{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+      <div class="alert-error"><i class="fa fa-triangle-exclamation"></i> {{ errorMessage }}</div>
+    }
+
+    @if (isLoading) {
+      <p class="loading-text">{{ 'profile.loading' | translate }}</p>
+    } @else if (user) {
+
+      <div class="profile-grid">
+
+        <!-- Carte identité -->
+        <section class="card identity-card">
+          <div class="avatar-lg">{{ user.username.charAt(0).toUpperCase() }}</div>
+          <h2>{{ user.fullName }}</h2>
+          <p class="username">&#64;{{ user.username }}</p>
+          <span class="badge badge-role">{{ user.role }}</span>
+          @if (user.lastLogin) {
+            <p class="last-login"><i class="fa fa-clock"></i> {{ 'profile.lastLogin' | translate }} {{ user.lastLogin | date:'dd/MM/yyyy HH:mm' }}</p>
+          }
+        </section>
+
+        <!-- Infos personnelles -->
+        <section class="card info-card">
+          <div class="card-header">
+            <h3><i class="fa fa-id-card"></i> {{ 'profile.info.title' | translate }}</h3>
+            @if (!isEditingInfo) {
+              <button class="link-btn" (click)="startEditInfo()"><i class="fa fa-pen"></i> {{ 'profile.edit' | translate }}</button>
+            }
+          </div>
+
+          @if (!isEditingInfo) {
+            <div class="info-row"><span>{{ 'profile.fullName' | translate }}</span><strong>{{ user.fullName }}</strong></div>
+            <div class="info-row"><span>{{ 'profile.email' | translate }}</span><strong>{{ user.email }}</strong></div>
+            <div class="info-row"><span>{{ 'profile.role' | translate }}</span><strong>{{ user.role }}</strong></div>
+          } @else {
+            @if (infoError) {
+              <div class="alert-error"><i class="fa fa-triangle-exclamation"></i> {{ infoError }}</div>
+            }
+            <label>{{ 'profile.fullName' | translate }}</label>
+            <input type="text" [(ngModel)]="infoForm.fullName" name="fullName" />
+            <label>{{ 'profile.email' | translate }}</label>
+            <input type="email" [(ngModel)]="infoForm.email" name="email" />
+            <div class="form-actions">
+              <button class="btn-secondary" (click)="cancelEditInfo()">{{ 'profile.cancel' | translate }}</button>
+              <button class="btn-primary" [disabled]="isSavingInfo" (click)="saveInfo()">
+                {{ isSavingInfo ? ('profile.saving' | translate) : ('profile.save' | translate) }}
+              </button>
+            </div>
+          }
+        </section>
+
+        <!-- Sécurité -->
+        <section class="card security-card">
+          <div class="card-header">
+            <h3><i class="fa fa-lock"></i> {{ 'profile.security.title' | translate }}</h3>
+          </div>
+
+          @if (!isChangingPassword) {
+            <p class="muted-text">{{ 'profile.security.desc' | translate }}</p>
+            <button class="btn-secondary" (click)="openPasswordForm()"><i class="fa fa-key"></i> {{ 'profile.security.changeBtn' | translate }}</button>
+          } @else {
+            @if (passwordError) {
+              <div class="alert-error"><i class="fa fa-triangle-exclamation"></i> {{ passwordError }}</div>
+            }
+            @if (passwordSuccess) {
+              <div class="alert-success"><i class="fa fa-circle-check"></i> {{ passwordSuccess }}</div>
+            }
+            <label>{{ 'profile.password.current' | translate }}</label>
+            <input type="password" [(ngModel)]="passwordForm.currentPassword" name="currentPassword" />
+            <label>{{ 'profile.password.new' | translate }}</label>
+            <input type="password" [(ngModel)]="passwordForm.newPassword" name="newPassword" />
+            <label>{{ 'profile.password.confirm' | translate }}</label>
+            <input type="password" [(ngModel)]="passwordForm.confirmPassword" name="confirmPassword" />
+            <div class="form-actions">
+              <button class="btn-secondary" (click)="cancelPasswordForm()">{{ 'profile.cancel' | translate }}</button>
+              <button class="btn-primary" [disabled]="isSavingPassword" (click)="submitPasswordChange()">
+                {{ isSavingPassword ? ('profile.saving' | translate) : ('profile.confirm' | translate) }}
+              </button>
+            </div>
+          }
+        </section>
+
+        <!-- Historique d'activité -->
+        <section class="card activity-card">
+          <div class="card-header">
+            <h3><i class="fa fa-clock-rotate-left"></i> {{ 'profile.activity.title' | translate }}</h3>
+          </div>
+
+          @if (isLoadingActivity) {
+            <p class="loading-text">{{ 'profile.activity.loading' | translate }}</p>
+          } @else if (activity.length === 0) {
+            <p class="muted-text">{{ 'profile.activity.empty' | translate }}</p>
+          } @else {
+            <table class="activity-table">
+              <thead>
+                <tr><th>{{ 'profile.th.serial' | translate }}</th><th>{{ 'profile.th.date' | translate }}</th><th>{{ 'profile.th.status' | translate }}</th></tr>
+              </thead>
+              <tbody>
+                @for (t of activity; track t.id) {
+                  <tr>
+                    <td>{{ t.serialNumber }}</td>
+                    <td>{{ t.testDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td><span [class]="statusClass(t.overallStatus)">{{ t.overallStatus }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </section>
+
+      </div>
+    }
+  </div>
+</div>

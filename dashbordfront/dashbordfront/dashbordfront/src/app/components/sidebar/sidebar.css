@@ -1,0 +1,45 @@
+* { box-sizing: border-box; }
+
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #00224d, #001330);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  flex-shrink: 0;
+}
+
+.sidebar-logo { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; margin-bottom: 36px; padding: 0 8px; }
+.sidebar-logo i { color: #4c9aff; font-size: 20px; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.sidebar-nav a {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px;
+  color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s ease;
+}
+.sidebar-nav a i { width: 18px; text-align: center; }
+.sidebar-nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+.sidebar-nav a.active {
+  background: linear-gradient(135deg, #0d6efd, #0056b3); color: white;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+}
+
+.sidebar-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; }
+.user-info { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 12px; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: #0d6efd;
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+.user-info div:last-child { display: flex; flex-direction: column; }
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: capitalize; }
+
+.logout-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px;
+  border: none; border-radius: 10px; background: rgba(220, 38, 38, 0.15); color: #ff8080;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s ease;
+}
+.logout-btn:hover { background: rgba(220, 38, 38, 0.3); }

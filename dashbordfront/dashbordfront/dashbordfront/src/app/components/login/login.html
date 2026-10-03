@@ -1,0 +1,58 @@
+<div class="login-container">
+  <div class="login-card">
+
+    
+
+    <h2>{{ 'login.title' | translate }}</h2>
+    <p class="subtitle">{{ 'login.subtitle' | translate }}</p>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+
+      <div class="input-box">
+        <label>{{ 'login.username' | translate }}</label>
+        <div class="icon-wrapper">
+          <i class="fa fa-user"></i>
+          <input
+            type="text"
+            name="username"
+            [(ngModel)]="username"
+            [placeholder]="'login.username.placeholder' | translate"
+            required>
+        </div>
+      </div>
+
+      <div class="input-box">
+        <label>{{ 'login.password' | translate }}</label>
+        <div class="icon-wrapper">
+          <i class="fa fa-lock"></i>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            [placeholder]="'login.password.placeholder' | translate"
+            required>
+        </div>
+      </div>
+
+      <div class="options-row">
+        <label>
+          <input type="checkbox" name="remember">
+          {{ 'login.remember' | translate }}
+        </label>
+        <a href="#">{{ 'login.forgot' | translate }}</a>
+      </div>
+
+      <button class="login-btn" type="submit" [disabled]="isLoading">
+        {{ isLoading ? ('login.connecting' | translate) : ('login.submit' | translate) }}
+      </button>
+
+    </form>
+
+    <p class="footer-text">{{ 'login.footer' | translate }}</p>
+
+  </div>
+</div>

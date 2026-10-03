@@ -1,0 +1,158 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="users-container">
+
+    <header class="users-header">
+      <div class="header-left">
+        <h1>{{ 'users.title.pre' | translate }} <span class="highlight">{{ 'users.title.highlight' | translate }}</span></h1>
+        <p>{{ 'users.subtitle' | translate }}</p>
+      </div>
+      <div class="header-right">
+        <button class="add-btn" (click)="openCreateModal()">
+          <i class="fa fa-user-plus"></i> {{ 'users.add' | translate }}
+        </button>
+      </div>
+    </header>
+
+    @if (successMessage) {
+      <div class="alert-success"><i class="fa fa-circle-check"></i> {{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+      <div class="alert-error"><i class="fa fa-triangle-exclamation"></i> {{ errorMessage }}</div>
+    }
+
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input
+          type="text"
+          [placeholder]="'users.search.placeholder' | translate"
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+        />
+      </div>
+      <button class="search-btn" (click)="onSearch()">{{ 'users.search.btn' | translate }}</button>
+    </div>
+
+    <div class="table-card">
+      @if (isLoading) {
+        <p class="loading-text">{{ 'users.loading' | translate }}</p>
+      } @else if (users.length === 0) {
+        <p class="empty-text">{{ 'users.empty' | translate }}</p>
+      } @else {
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>{{ 'users.th.user' | translate }}</th>
+              <th>{{ 'users.th.email' | translate }}</th>
+              <th>{{ 'users.th.role' | translate }}</th>
+              <th>{{ 'users.th.status' | translate }}</th>
+              <th class="actions-col">{{ 'users.th.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users; track user.id) {
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="avatar-sm">{{ user.username.charAt(0).toUpperCase() }}</div>
+                    <div>
+                      <div class="user-fullname">{{ user.fullName }}</div>
+                      <div class="user-username">&#64;{{ user.username }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ user.email }}</td>
+                <td><span [class]="roleClass(user.role)">{{ user.role }}</span></td>
+                <td>
+                  <button class="status-toggle" [class.status-active]="user.active" (click)="toggleActive(user)">
+                    <i class="fa" [class.fa-toggle-on]="user.active" [class.fa-toggle-off]="!user.active"></i>
+                    {{ user.active ? ('users.active' | translate) : ('users.inactive' | translate) }}
+                  </button>
+                </td>
+                <td class="actions-col">
+                  <button class="icon-btn" [title]="'users.edit.title' | translate" (click)="openEditModal(user)">
+                    <i class="fa fa-pen"></i>
+                  </button>
+                  <button class="icon-btn icon-btn-danger" [title]="'users.delete.title' | translate" (click)="askDelete(user)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal création / édition -->
+@if (isModalOpen) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h2>{{ isEditMode ? ('users.modal.edit' | translate) : ('users.modal.create' | translate) }}</h2>
+
+      @if (formError) {
+        <div class="alert-error"><i class="fa fa-triangle-exclamation"></i> {{ formError }}</div>
+      }
+
+      <form (ngSubmit)="submitForm()">
+        @if (!isEditMode) {
+          <label>{{ 'users.form.username' | translate }}</label>
+          <input type="text" [(ngModel)]="form.username" name="username" required />
+        }
+
+        <label>{{ 'users.form.fullName' | translate }}</label>
+        <input type="text" [(ngModel)]="form.fullName" name="fullName" required />
+
+        <label>{{ 'users.form.email' | translate }}</label>
+        <input type="email" [(ngModel)]="form.email" name="email" required />
+
+        <label>{{ 'users.form.role' | translate }}</label>
+        <select [(ngModel)]="form.role" name="role" required>
+          @for (r of roles; track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+
+        @if (!isEditMode) {
+          <label>{{ 'users.form.password' | translate }}</label>
+          <input type="password" [(ngModel)]="form.password" name="password" required />
+        }
+
+        @if (isEditMode) {
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="form.active" name="active" />
+            {{ 'users.form.active' | translate }}
+          </label>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeModal()">{{ 'users.cancel' | translate }}</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving">
+            {{ isSaving ? ('users.saving' | translate) : ('users.save' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Confirmation suppression -->
+@if (userPendingDelete) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-card modal-card-sm" (click)="$event.stopPropagation()">
+      <h2>{{ 'users.delete.confirmTitle' | translate }}</h2>
+      <p>
+        {{ 'users.delete.confirmText1' | translate }} <strong>{{ userPendingDelete.fullName }}</strong>
+        (&#64;{{ userPendingDelete.username }}) {{ 'users.delete.confirmText2' | translate }}
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="cancelDelete()">{{ 'users.cancel' | translate }}</button>
+        <button type="button" class="btn-danger" (click)="confirmDelete()">{{ 'users.delete.btn' | translate }}</button>
+      </div>
+    </div>
+  </div>
+}

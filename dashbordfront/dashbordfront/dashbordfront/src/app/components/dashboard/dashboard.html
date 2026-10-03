@@ -1,0 +1,230 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="dashboard-container">
+
+    <header class="dashboard-header">
+      <div class="header-left">
+        <h1>{{ 'dashboard.title.pre' | translate }} <span class="highlight">TF GTW T5</span></h1>
+        <p><span class="live-dot"></span> {{ 'dashboard.live' | translate }}</p>
+      </div>
+      <div class="header-right">
+        <button class="refresh-btn" (click)="loadDashboard()">
+          <i class="fa fa-rotate-right"></i> {{ 'dashboard.refresh' | translate }}
+        </button>
+      </div>
+    </header>
+
+    @if (errorMessage) {
+      <div class="alert-error"><i class="fa fa-triangle-exclamation"></i> {{ errorMessage }}</div>
+    }
+
+    @if (summary) {
+      <section class="kpi-grid">
+        <div class="kpi-card" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+          <div class="kpi-icon kpi-icon-total"><i class="fa fa-layer-group"></i></div>
+          <div class="kpi-text">
+            <span class="kpi-value">{{ summary.totalTests }}</span>
+            <span class="kpi-label">{{ 'dashboard.kpi.total' | translate }}</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+          <div class="kpi-icon kpi-icon-pass"><i class="fa fa-circle-check"></i></div>
+          <div class="kpi-text">
+            <span class="kpi-value">{{ summary.passCount }}</span>
+            <span class="kpi-label">{{ 'dashboard.kpi.pass' | translate }}</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+          <div class="kpi-icon kpi-icon-fail"><i class="fa fa-circle-xmark"></i></div>
+          <div class="kpi-text">
+            <span class="kpi-value">{{ summary.failCount }}</span>
+            <span class="kpi-label">{{ 'dashboard.kpi.fail' | translate }}</span>
+          </div>
+        </div>
+
+        <div class="kpi-card" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+          <div class="kpi-icon kpi-icon-blocked"><i class="fa fa-ban"></i></div>
+          <div class="kpi-text">
+            <span class="kpi-value">{{ summary.blockedCount }}</span>
+            <span class="kpi-label">{{ 'dashboard.kpi.blocked' | translate }}</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-highlight" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+          <div class="kpi-icon kpi-icon-rate"><i class="fa fa-gauge-high"></i></div>
+          <div class="kpi-text">
+            <span class="kpi-value">{{ summary.passRate | number:'1.1-1' }}%</span>
+            <span class="kpi-label">{{ 'dashboard.kpi.rate' | translate }}</span>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (hasElectricalData) {
+      <section class="electrical-grid">
+        @for (param of electricalParams; track param.key) {
+          <div class="gauge-card" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+            <div class="gauge-ring" [ngStyle]="gaugeStyle(param.percent)">
+              <div class="gauge-hole">
+                <i class="fa" [ngClass]="param.icon"></i>
+              </div>
+            </div>
+            <div class="gauge-text">
+              <span class="gauge-value">{{ param.avg | number:'1.1-2' }} <small>{{ param.unit }}</small></span>
+              <span class="gauge-label">{{ param.label }}</span>
+              <span class="gauge-range">min {{ param.min | number:'1.0-2' }} · max {{ param.max | number:'1.0-2' }}</span>
+            </div>
+          </div>
+        }
+      </section>
+    }
+
+    <section class="charts-grid">
+
+      <div class="chart-card chart-card-donut" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+        <div class="chart-card-header">
+          <h3><i class="fa fa-chart-pie"></i> {{ 'dashboard.status.title' | translate }}</h3>
+        </div>
+        @if (summary) {
+          <div class="canvas-wrap canvas-wrap-donut">
+            <canvas #statusCanvas></canvas>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <i class="fa fa-chart-pie"></i>
+            <p>{{ 'dashboard.loading' | translate }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="chart-card" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+        <div class="chart-card-header">
+          <h3><i class="fa fa-magnifying-glass-chart"></i> {{ 'dashboard.defects.title' | translate }}</h3>
+        </div>
+        @if (defectEntries.length > 0) {
+          <div class="canvas-wrap">
+            <canvas #defectCanvas></canvas>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <i class="fa fa-circle-check"></i>
+            <p>{{ 'dashboard.defects.empty' | translate }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="chart-card chart-card-wide" (mousemove)="onCardTilt($event)" (mouseleave)="onCardTiltReset($event)">
+        <div class="chart-card-header">
+          <h3><i class="fa fa-chart-area"></i> {{ 'dashboard.trend.title' | translate }}</h3>
+          <div class="legend">
+            <span class="legend-dot legend-pass"></span> {{ 'dashboard.legend.pass' | translate }}
+            <span class="legend-dot legend-fail"></span> {{ 'dashboard.legend.fail' | translate }}
+            <span class="legend-dot legend-blocked"></span> {{ 'dashboard.legend.blocked' | translate }}
+          </div>
+        </div>
+        @if (trend && trend.points.length > 0) {
+          <div class="canvas-wrap canvas-wrap-trend">
+            <canvas #trendCanvas></canvas>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <i class="fa fa-chart-line"></i>
+            <p>{{ 'dashboard.trend.empty' | translate }}</p>
+          </div>
+        }
+      </div>
+
+    </section>
+
+    <section class="table-card">
+      <div class="table-toolbar">
+        <h3><i class="fa fa-list-check"></i> {{ 'dashboard.history.title' | translate }}</h3>
+        <div class="filters">
+          <select [(ngModel)]="statusFilter" (change)="onFilterChange()">
+            <option value="">{{ 'dashboard.filter.all' | translate }}</option>
+            <option value="PASS">PASS</option>
+            <option value="FAIL">FAIL</option>
+            <option value="BLOCKED">{{ 'dashboard.filter.blocked' | translate }}</option>
+          </select>
+          <div class="search-box">
+            <i class="fa fa-magnifying-glass"></i>
+            <input type="text" [placeholder]="'dashboard.search.placeholder' | translate" [(ngModel)]="searchFilter" (keyup.enter)="onFilterChange()">
+          </div>
+          <button class="search-btn" (click)="onFilterChange()">{{ 'dashboard.search.btn' | translate }}</button>
+        </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="empty-state">
+          <i class="fa fa-spinner fa-spin"></i>
+          <p>{{ 'dashboard.loading' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'dashboard.th.serial' | translate }}</th>
+                <th>{{ 'dashboard.th.date' | translate }}</th>
+                <th>{{ 'dashboard.th.operator' | translate }}</th>
+                <th>{{ 'dashboard.th.visual' | translate }}</th>
+                <th>{{ 'dashboard.th.electrical' | translate }}</th>
+                @if (hasElectricalData) {
+                  <th>V</th>
+                  <th>A</th>
+                  <th>Ω</th>
+                  <th>W</th>
+                  <th>°C</th>
+                }
+                <th>{{ 'dashboard.th.status' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (test of tests; track test.id) {
+                <tr>
+                  <td class="serial-cell"><i class="fa fa-microchip"></i> {{ test.serialNumber }}</td>
+                  <td>{{ test.testDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ test.operatorUsername }}</td>
+                  <td><span [class]="statusClass(test.visualStatus)">{{ test.visualStatus }}</span></td>
+                  <td><span [class]="statusClass(test.electricalStatus)">{{ test.electricalStatus }}</span></td>
+                  @if (hasElectricalData) {
+                    <td>{{ test.voltage != null ? (test.voltage | number:'1.0-2') : '—' }}</td>
+                    <td>{{ test.current != null ? (test.current | number:'1.0-2') : '—' }}</td>
+                    <td>{{ test.resistance != null ? (test.resistance | number:'1.0-2') : '—' }}</td>
+                    <td>{{ test.power != null ? (test.power | number:'1.0-2') : '—' }}</td>
+                    <td>{{ test.temperature != null ? (test.temperature | number:'1.0-2') : '—' }}</td>
+                  }
+                  <td><span [class]="statusClass(test.overallStatus)">{{ test.overallStatus }}</span></td>
+                </tr>
+              }
+              @empty {
+                <tr>
+                  <td [attr.colspan]="hasElectricalData ? 11 : 6">
+                    <div class="empty-state">
+                      <i class="fa fa-inbox"></i>
+                      <p>{{ 'dashboard.empty' | translate }}</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+            <i class="fa fa-chevron-left"></i> {{ 'dashboard.prev' | translate }}
+          </button>
+          <span class="page-info">{{ 'dashboard.page' | translate }} {{ currentPage + 1 }} / {{ totalPages || 1 }}</span>
+          <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage + 1 >= totalPages">
+            {{ 'dashboard.next' | translate }} <i class="fa fa-chevron-right"></i>
+          </button>
+        </div>
+      }
+    </section>
+
+  </div>
+</div>

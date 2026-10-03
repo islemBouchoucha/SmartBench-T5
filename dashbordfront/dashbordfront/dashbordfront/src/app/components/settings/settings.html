@@ -1,0 +1,92 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="settings-container">
+
+    <header class="settings-header">
+      <h1>{{ 'settings.title' | translate }}</h1>
+      <p>{{ 'settings.subtitle' | translate }}</p>
+    </header>
+
+    <div class="settings-grid">
+
+      <!-- Préférences d'affichage -->
+      <section class="card">
+        <div class="card-header">
+          <h3><i class="fa fa-palette"></i> {{ 'settings.display.title' | translate }}</h3>
+        </div>
+
+        @if (prefsSaved) {
+          <div class="alert-success"><i class="fa fa-circle-check"></i> {{ 'settings.display.saved' | translate }}</div>
+        }
+
+        <label>{{ 'settings.theme' | translate }}</label>
+        <div class="toggle-group">
+          <button
+            class="toggle-option"
+            [class.active]="prefs.theme === 'light'"
+            (click)="prefs.theme = 'light'"
+          >
+            <i class="fa fa-sun"></i> {{ 'settings.theme.light' | translate }}
+          </button>
+          <button
+            class="toggle-option"
+            [class.active]="prefs.theme === 'dark'"
+            (click)="prefs.theme = 'dark'"
+          >
+            <i class="fa fa-moon"></i> {{ 'settings.theme.dark' | translate }}
+          </button>
+        </div>
+
+        <label>{{ 'settings.language' | translate }}</label>
+        <select [(ngModel)]="prefs.language" name="language">
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+        </select>
+
+        <div class="form-actions">
+          <button class="btn-primary" (click)="savePreferences()">{{ 'settings.save.prefs' | translate }}</button>
+        </div>
+      </section>
+
+      <!-- Paramètres système -->
+      <section class="card">
+        <div class="card-header">
+          <h3><i class="fa fa-sliders"></i> {{ 'settings.system.title' | translate }}</h3>
+        </div>
+
+        @if (isLoadingSystem) {
+          <p class="loading-text">{{ 'settings.loading' | translate }}</p>
+        } @else {
+          @if (systemSaved) {
+            <div class="alert-success"><i class="fa fa-circle-check"></i> {{ 'settings.system.saved' | translate }}</div>
+          }
+          @if (systemError) {
+            <div class="alert-error"><i class="fa fa-triangle-exclamation"></i> {{ systemError }}</div>
+          }
+
+          <label>{{ 'settings.failRate' | translate }}</label>
+          <input type="number" min="0" max="100" [(ngModel)]="system.failRateAlertThreshold" name="failRateAlertThreshold" />
+
+          <label>{{ 'settings.blockedRate' | translate }}</label>
+          <input type="number" min="0" max="100" [(ngModel)]="system.blockedAlertThreshold" name="blockedAlertThreshold" />
+
+          <label>{{ 'settings.refresh' | translate }}</label>
+          <input type="number" min="5" [(ngModel)]="system.dashboardAutoRefreshSeconds" name="dashboardAutoRefreshSeconds" />
+
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="system.emailNotifications" name="emailNotifications" />
+            {{ 'settings.emailNotif' | translate }}
+          </label>
+
+          <div class="form-actions">
+            <button class="btn-primary" [disabled]="isSavingSystem" (click)="saveSystemSettings()">
+              {{ isSavingSystem ? ('settings.saving' | translate) : ('settings.save.system' | translate) }}
+            </button>
+          </div>
+        }
+      </section>
+
+    </div>
+  </div>
+</div>

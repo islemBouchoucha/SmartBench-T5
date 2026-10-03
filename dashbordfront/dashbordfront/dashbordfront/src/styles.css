@@ -1,0 +1,13 @@
+/* You can add global styles to this file, and also import other style files */
+
+html {
+  transition: background-color 0.2s ease;
+}
+
+[data-theme="dark"] body {
+  background: #0b0f17;
+}
+
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}

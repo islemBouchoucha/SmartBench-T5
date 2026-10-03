@@ -1,0 +1,28 @@
+server:
+  port: 9090
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dashboard_db
+    username: postgres
+    password: azerty
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      # 'update' en dev : cree/adapte les tables automatiquement a partir des entites.
+      # Passez a 'validate' en production et gerez le schema avec les scripts SQL fournis / Flyway.
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  jwt:
+    # IMPORTANT : changez cette clé en production (256 bits minimum, gardez-la hors du code source)
+    secret: "ChangezCetteCleSecreteEnProductionIlFautAuMoins256BitsDeLongueur"
+    expiration-ms: 86400000 # 24h
+
+  cors:
+    allowed-origins: "http://localhost:4200,http://localhost:5173"
